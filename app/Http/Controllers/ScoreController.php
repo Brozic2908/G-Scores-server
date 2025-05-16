@@ -65,27 +65,20 @@ class ScoreController extends Controller
     {
         // Get top 10 students in group A (Math, Physics, Chemistry)
         $mathId = Subject::where('code', 'toan')->first()->id;
-        $physicsId = Subject::where('code', 'vat_li')->first()->id;
+        $physicsId = Student::where('code', 'vat_li')->get();
         $chemistryId = Subject::where('code', 'hoa_hoc')->first()->id;
-
-        if (!$mathId || !$physicsId || !$chemistryId) {
-            return response()->json([
-                'success' => false,
-                'message' => 'One or more subjects not found',
-            ], 404);
-        }
 
         $topStudent = Student::select('students.id', 'students.registration_number')
             ->join('scores as math_scores', function ($join) use ($mathId) {
-                $join->on('students.id', '=', 'math_scores.student_id')
+                $join->on('student.id', '=', 'math_scores.student_id')
                     ->where('math_scores.subject_id', '=', $mathId);
             })
             ->join('scores as physics_scores', function ($join) use ($physicsId) {
-                $join->on('students.id', '=', 'physics_scores.student_id')
+                $join->on('student.id', '=', 'physics_scores.student_id')
                     ->where('physics_scores.subject_id', '=', $physicsId);
             })
             ->join('scores as chemistry_scores', function ($join) use ($chemistryId) {
-                $join->on('students.id', '=', 'chemistry_scores.student_id')
+                $join->on('student.id', '=', 'chemistry_scores.student_id')
                     ->where('chemistry_scores.subject_id', '=', $chemistryId);
             })
             ->select(
@@ -95,8 +88,8 @@ class ScoreController extends Controller
                 'chemistry_scores.score as chemistry_score',
                 DB::raw('(math_scores.score + physics_scores.score + chemistry_scores.score) as total_score')
             )
-            ->orderBy('total_score', 'desc')
-            ->take(10)
+            ->orderBy('total_score')
+            ->limit(10)
             ->get();
 
         return response()->json($topStudent);
