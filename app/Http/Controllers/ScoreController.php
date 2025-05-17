@@ -39,7 +39,7 @@ class ScoreController extends Controller
             'student' => [
                 'registration_number' => $student->registration_number,
                 'scores' => $formattedScores,
-                'language' => $student->language->languageType->name
+                'language' => $student->language->languageType->name,
             ]
         ]);
     }
